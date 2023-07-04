@@ -1,6 +1,6 @@
 import requests
 import os
-
+from contextlib import suppress
 
 
 def get_book(book_id):
@@ -9,10 +9,12 @@ def get_book(book_id):
 
     payload = {'id': book_id}
 
-    response = requests.get(url, params=payload, allow_redirects=False)
+    response = requests.get(url, params=payload)
+    response.raise_for_status()
 
-    if not response.is_redirect:
-        return response.text
+    check_for_redirect(response)
+
+    return response.text
 
 
 def save_book(filename, book):
@@ -27,10 +29,15 @@ def save_book(filename, book):
         file.write(book)
 
 
+def check_for_redirect(response):
+    if response.history:
+        raise requests.HTTPError
+
+
 def main():
     for id in range(1, 11):
-        book = get_book(id)
-        if book:
+        with suppress(requests.HTTPError):
+            book = get_book(id)
             save_book(str(id), book)
 
 

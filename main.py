@@ -2,16 +2,17 @@ import requests
 import os
 
 
+
 def get_book(book_id):
 
     url = "https://tululu.org/txt.php"
 
     payload = {'id': book_id}
 
-    response = requests.get(url, params=payload)
-    response.raise_for_status()
+    response = requests.get(url, params=payload, allow_redirects=False)
 
-    return response.text
+    if not response.is_redirect:
+        return response.text
 
 
 def save_book(filename, book):
@@ -21,6 +22,7 @@ def save_book(filename, book):
     book_file = ".".join([filename, 'txt'])
     book_path = "/".join(['books', book_file])
 
+
     with open(book_path, 'w') as file:
         file.write(book)
 
@@ -28,7 +30,8 @@ def save_book(filename, book):
 def main():
     for id in range(1, 11):
         book = get_book(id)
-        save_book(str(id), book)
+        if book:
+            save_book(str(id), book)
 
 
 if __name__=="__main__":

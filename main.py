@@ -81,10 +81,14 @@ def get_book_details(id):
 
     book_details = soup.title.text.split(', ')[0]
     name, _ = book_details.split(' - ')
+
     book_image_src = soup.find('div', class_='bookimage').find('img')['src']
     book_image_url = urljoin('https://tululu.org/', book_image_src)
 
-    return name, book_image_url
+    comments = soup.find_all('div', class_='texts')
+    comments = [comment.find('span').text for comment in comments]
+
+    return name, book_image_url, comments
 
 
 def main():
@@ -97,5 +101,4 @@ def main():
 if __name__=="__main__":
     for id in range(1, 11):
         with suppress(requests.HTTPError):
-            _, book_image_url = get_book_details(id)
-            download_image(book_image_url, 'images')
+            print(get_book_details(id))

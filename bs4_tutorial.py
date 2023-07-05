@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 def main():
     url = 'https://www.franksonnenbergonline.com/blog/are-you-grateful/'
     response = requests.get(url)

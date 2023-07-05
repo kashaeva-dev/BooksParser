@@ -22,15 +22,14 @@ def get_book(book_id):
     return response.text
 
 
-def download_txt(id, filename, folder):
-    book = get_book(id)
+def download_txt(book_id, filename, folder):
+    book = get_book(book_id)
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    filename = ". ".join([str(id), sanitize_filename(filename)])
+    filename = ". ".join([str(book_id), sanitize_filename(filename)])
     book_file = ".".join([filename, 'txt'])
     book_path = os.path.join(folder, book_file)
-
 
     with open(book_path, 'w') as file:
         file.write(book)
@@ -51,7 +50,6 @@ def download_image(url, folder):
 
     image_path = os.path.join(folder, image_filename)
 
-
     with open(image_path, 'wb') as file:
         file.write(response.content)
 
@@ -61,8 +59,8 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def parse_book_page(id):
-    url = f'https://tululu.org/b{id}/'
+def parse_book_page(book_id):
+    url = f'https://tululu.org/b{book_id}/'
     response = requests.get(url)
     response.raise_for_status()
 
@@ -70,7 +68,7 @@ def parse_book_page(id):
 
     soup = BeautifulSoup(response.text, 'lxml')
 
-    book_details = dict()
+    book_details = {}
     book_details['name'], book_details['author'] = soup.title.text.split(', ')[0].split(' - ')
 
     image_src = soup.find('div', class_='bookimage').find('img')['src']
@@ -97,7 +95,7 @@ def create_parser():
         description="A book parser for tululu.org website. "
                     "You can download books by specifying the range of book ids. "
                     "Books will be saved in the 'books' folder, books' covers in the 'images' folder."
-                    "In the console, you will see the names and authors of the downloaded books."
+                    "In the console, you will see the names and authors of the downloaded books.",
     )
     parser.add_argument('start_id',
                         help='You should specify the start id of the books range',
@@ -115,13 +113,13 @@ def main():
     user_input = parser.parse_args()
     start_id = user_input.start_id
     end_id = user_input.end_id
-    for id in range(start_id, end_id + 1):
+    for book_id in range(start_id, end_id + 1):
         with suppress(requests.HTTPError):
-            book_details = parse_book_page(id)
-            is_downloaded = download_txt(id, book_details['name'], 'books')
+            book_details = parse_book_page(book_id)
+            is_downloaded = download_txt(book_id, book_details['name'], 'books')
             download_image(book_details['image_url'], 'images')
             show_book_details(book_details, is_downloaded)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

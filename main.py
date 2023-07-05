@@ -21,18 +21,6 @@ def get_book(book_id):
     return response.text
 
 
-def get_book(url):
-
-
-
-    response = requests.get(url, params=payload)
-    response.raise_for_status()
-
-    check_for_redirect(response)
-
-    return response.text
-
-
 def download_txt(id, filename, folder):
     book = get_book(id)
     if not os.path.exists(folder):
@@ -45,6 +33,8 @@ def download_txt(id, filename, folder):
 
     with open(book_path, 'w') as file:
         file.write(book)
+
+    return True
 
 
 def download_image(url, folder):
@@ -80,7 +70,7 @@ def parse_book_page(id):
     soup = BeautifulSoup(response.text, 'lxml')
 
     book_details = dict()
-    book_details['name'] = soup.title.text.split(', ')[0].split(' - ')[0]
+    book_details['name'], book_details['author'] = soup.title.text.split(', ')[0].split(' - ')
 
     image_src = soup.find('div', class_='bookimage').find('img')['src']
     book_details['image_url'] = urljoin('https://tululu.org/', image_src)
@@ -93,14 +83,20 @@ def parse_book_page(id):
     return book_details
 
 
+def show_book_details(book_details, is_downloaded):
+    if is_downloaded:
+        print('Название:', book_details['name'])
+        print('Автор:', book_details['author'])
+
+
 def main():
     for id in range(1, 11):
         with suppress(requests.HTTPError):
-            filename, _ = get_book_details(id)
-            download_txt(id, filename, 'books')
+            book_details = parse_book_page(id)
+            is_downloaded = download_txt(id, book_details['name'], 'books')
+            download_image(book_details['image_url'], 'images')
+            show_book_details(book_details, is_downloaded)
 
 
 if __name__=="__main__":
-    for id in range(1, 11):
-        with suppress(requests.HTTPError):
-            print(parse_book_page(id))
+    main()

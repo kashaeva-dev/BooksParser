@@ -8,10 +8,13 @@ from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 
 
-def get_book(book_id):
+def check_for_redirect(response):
+    if response.history:
+        raise requests.HTTPError
 
+
+def download_txt(book_id, filename, folder):
     url = "https://tululu.org/txt.php"
-
     payload = {'id': book_id}
 
     response = requests.get(url, params=payload)
@@ -19,17 +22,13 @@ def get_book(book_id):
 
     check_for_redirect(response)
 
-    return response.text
+    book = response.text
 
-
-def download_txt(book_id, filename, folder):
-    book = get_book(book_id)
     if not os.path.exists(folder):
         os.makedirs(folder)
 
     filename = ". ".join([str(book_id), sanitize_filename(filename)])
-    book_file = ".".join([filename, 'txt'])
-    book_path = os.path.join(folder, book_file)
+    book_path = os.path.join(folder, ".".join([filename, 'txt']))
 
     with open(book_path, 'w') as file:
         file.write(book)
@@ -52,11 +51,6 @@ def download_image(url, folder):
 
     with open(image_path, 'wb') as file:
         file.write(response.content)
-
-
-def check_for_redirect(response):
-    if response.history:
-        raise requests.HTTPError
 
 
 def parse_book_page(book_id):

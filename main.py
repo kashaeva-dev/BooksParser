@@ -25,7 +25,7 @@ def download_txt(id, filename, folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    filename = sanitize_filename(filename)
+    filename = ". ".join([str(id), sanitize_filename(filename)])
     book_file = ".".join([filename, 'txt'])
     book_path = os.path.join(folder, book_file)
 
@@ -57,7 +57,6 @@ def get_book_details(id):
 def main():
     for id in range(1, 11):
         with suppress(requests.HTTPError):
-            print(id)
             filename, _ = get_book_details(id)
             download_txt(id, filename, 'books')
 

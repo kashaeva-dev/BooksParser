@@ -70,7 +70,7 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def get_book_details(id):
+def parse_book_page(id):
     url = f'https://tululu.org/b{id}/'
     response = requests.get(url)
     response.raise_for_status()
@@ -79,18 +79,18 @@ def get_book_details(id):
 
     soup = BeautifulSoup(response.text, 'lxml')
 
-    book_details = soup.title.text.split(', ')[0]
-    name, _ = book_details.split(' - ')
+    book_details = dict()
+    book_details['name'] = soup.title.text.split(', ')[0].split(' - ')[0]
 
-    book_image_src = soup.find('div', class_='bookimage').find('img')['src']
-    book_image_url = urljoin('https://tululu.org/', book_image_src)
+    image_src = soup.find('div', class_='bookimage').find('img')['src']
+    book_details['image_url'] = urljoin('https://tululu.org/', image_src)
 
-    genre = soup.find('span', class_='d_book').find('a').text
+    book_details['genre'] = soup.find('span', class_='d_book').find('a').text
 
     comments = soup.find_all('div', class_='texts')
-    comments = [comment.find('span').text for comment in comments]
+    book_details['comments'] = [comment.find('span').text for comment in comments]
 
-    return name, book_image_url, comments, genre
+    return book_details
 
 
 def main():
@@ -103,4 +103,4 @@ def main():
 if __name__=="__main__":
     for id in range(1, 11):
         with suppress(requests.HTTPError):
-            print(get_book_details(id))
+            print(parse_book_page(id))

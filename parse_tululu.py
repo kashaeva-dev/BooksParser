@@ -1,10 +1,11 @@
-import requests
+import argparse
 import os
 from contextlib import suppress
-from pathvalidate import sanitize_filename
 from urllib.parse import urljoin, urlsplit
 
+import requests
 from bs4 import BeautifulSoup
+from pathvalidate import sanitize_filename
 
 
 def get_book(book_id):
@@ -87,10 +88,34 @@ def show_book_details(book_details, is_downloaded):
     if is_downloaded:
         print('Название:', book_details['name'])
         print('Автор:', book_details['author'])
+        print('')
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(
+        prog='Parse books from tululu',
+        description="A book parser for tululu.org website. "
+                    "You can download books by specifying the range of book ids. "
+                    "Books will be saved in the 'books' folder, books' covers in the 'images' folder."
+                    "In the console, you will see the names and authors of the downloaded books."
+    )
+    parser.add_argument('start_id',
+                        help='You should specify the start id of the books range',
+                        type=int,
+                        default=1)
+    parser.add_argument('end_id',
+                        help='You should specify the end id of the books range',
+                        type=int,
+                        default=10)
+    return parser
 
 
 def main():
-    for id in range(1, 11):
+    parser = create_parser()
+    user_input = parser.parse_args()
+    start_id = user_input.start_id
+    end_id = user_input.end_id
+    for id in range(start_id, end_id + 1):
         with suppress(requests.HTTPError):
             book_details = parse_book_page(id)
             is_downloaded = download_txt(id, book_details['name'], 'books')

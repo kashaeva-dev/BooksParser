@@ -85,10 +85,12 @@ def get_book_details(id):
     book_image_src = soup.find('div', class_='bookimage').find('img')['src']
     book_image_url = urljoin('https://tululu.org/', book_image_src)
 
+    genre = soup.find('span', class_='d_book').find('a').text
+
     comments = soup.find_all('div', class_='texts')
     comments = [comment.find('span').text for comment in comments]
 
-    return name, book_image_url, comments
+    return name, book_image_url, comments, genre
 
 
 def main():

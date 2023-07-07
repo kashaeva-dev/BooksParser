@@ -1,7 +1,6 @@
 import argparse
 import os
 import logging.config
-from contextlib import suppress
 from urllib.parse import urljoin, urlsplit
 
 import requests
@@ -29,8 +28,7 @@ def download_txt(book_id, filename, folder):
 
     book = response.text
 
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(folder, exist_ok=True)
 
     filename = ". ".join([str(book_id), sanitize_filename(filename)])
     book_path = os.path.join(folder, ".".join([filename, 'txt']))
@@ -49,8 +47,7 @@ def download_image(url, folder):
 
     _, image_filename = os.path.split(urlsplit(url).path)
 
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(folder, exist_ok=True)
 
     image_path = os.path.join(folder, image_filename)
 
@@ -121,10 +118,12 @@ def create_parser():
 def main():
     logging.config.dictConfig(logger_config)
     logger.debug('Start parsing books')
+
     parser = create_parser()
     user_input = parser.parse_args()
     start_id = user_input.start_id
     end_id = user_input.end_id
+
     for book_id in range(start_id, end_id + 1):
         try:
             book_page = get_book_page(book_id)
@@ -135,7 +134,6 @@ def main():
             logger.error(f'Book with id {book_id} is not found')
             continue
         show_book_details(book_details, is_downloaded)
-
 
 
 if __name__ == "__main__":

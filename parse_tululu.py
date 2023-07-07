@@ -58,14 +58,18 @@ def download_image(url, folder):
         file.write(response.content)
 
 
-def parse_book_page(book_id):
+def get_book_page(book_id):
     url = f'https://tululu.org/b{book_id}/'
     response = requests.get(url)
     response.raise_for_status()
 
     check_for_redirect(response)
 
-    soup = BeautifulSoup(response.text, 'lxml')
+    return response.text
+
+
+def parse_book_page(response_text):
+    soup = BeautifulSoup(response_text, 'lxml')
 
     book_details = {}
     book_details['name'], book_details['author'] = soup.title.text.split(', ')[0].split(' - ')
@@ -116,7 +120,8 @@ def main():
     end_id = user_input.end_id
     for book_id in range(start_id, end_id + 1):
         try:
-            book_details = parse_book_page(book_id)
+            response_text = get_book_page(book_id)
+            book_details = parse_book_page(response_text)
             is_downloaded = download_txt(book_id, book_details['name'], 'books')
             download_image(book_details['image_url'], 'images')
         except requests.HTTPError:

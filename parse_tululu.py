@@ -89,13 +89,6 @@ def parse_book_page(response):
     return book_details
 
 
-def show_book_details(book_details, is_downloaded):
-    if is_downloaded:
-        print('Название:', book_details['name'])
-        print('Автор:', book_details['author'])
-        print('')
-
-
 def create_parser():
     parser = argparse.ArgumentParser(
         prog='Parse books from tululu',
@@ -133,7 +126,10 @@ def main():
         except requests.HTTPError:
             logger.error(f'Book with id {book_id} is not found')
             continue
-        show_book_details(book_details, is_downloaded)
+        if is_downloaded:
+            print('Название:', book_details['name'])
+            print('Автор:', book_details['author'])
+            print('')
 
 
 if __name__ == "__main__":

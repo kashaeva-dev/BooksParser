@@ -18,11 +18,11 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def download_txt(book_id, filename, folder):
+def download_txt(book_id, filename, folder, timeout=10):
     url = "https://tululu.org/txt.php"
     payload = {'id': book_id}
 
-    response = requests.get(url, params=payload, timeout=10)
+    response = requests.get(url, params=payload, timeout=timeout)
     response.raise_for_status()
 
     check_for_redirect(response)
@@ -40,8 +40,8 @@ def download_txt(book_id, filename, folder):
     return True
 
 
-def download_image(url, folder):
-    response = requests.get(url, timeout=10)
+def download_image(url, folder, timeout=10):
+    response = requests.get(url, timeout=timeout)
     response.raise_for_status()
 
     check_for_redirect(response)
@@ -56,9 +56,9 @@ def download_image(url, folder):
         file.write(response.content)
 
 
-def get_book_page(book_id):
+def get_book_page(book_id, timeout=10):
     url = f'https://tululu.org/b{book_id}/'
-    response = requests.get(url, timeout=10)
+    response = requests.get(url, timeout=timeout)
     response.raise_for_status()
 
     check_for_redirect(response)
@@ -121,33 +121,28 @@ def main():
     end_id = user_input.end_id
 
     resume_state = start_id
+    timeout = 10
     book_processed = False
 
     while resume_state < end_id + 1:
         logger.debug('Начинается while')
-        if os.path.exists('resume_state.txt'):
-            with open('resume_state.txt', 'r') as file:
-                resume_state = int(file.read())
-            os.remove('resume_state.txt')
         for book_id in range(resume_state, end_id + 1):
             logger.debug(f'скачиваем книгу: {book_id}')
             try:
-                book_page = get_book_page(book_id)
+                book_page = get_book_page(book_id, timeout)
                 book_details = parse_book_page(book_page)
-                is_downloaded = download_txt(book_id, book_details['name'], 'books')
-                download_image(book_details['image_url'], 'images')
+                is_downloaded = download_txt(book_id, book_details['name'], 'books', timeout)
+                download_image(book_details['image_url'], 'images', timeout)
                 book_processed = True
             except requests.exceptions.HTTPError:
                 logger.error(f'Book with id {book_id} is not found')
                 book_processed = True
                 continue
             except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
-                if not os.path.exists('resume_state.txt'):
-                    with open('resume_state.txt', 'w') as file:
-                        file.write(f'{book_id}')
-                logger.error('Connection error')
-                sleep(5)
                 book_processed = False
+                logger.error('Connection error')
+                resume_state = book_id
+                sleep(5)
                 break
 
             if is_downloaded:
@@ -156,8 +151,6 @@ def main():
                 print('')
         if book_processed:
             break
-        else:
-            continue
 
 
 if __name__ == "__main__":

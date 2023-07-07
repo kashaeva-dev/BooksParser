@@ -71,8 +71,11 @@ def get_book_page(book_id):
 def parse_book_page(response_text):
     soup = BeautifulSoup(response_text, 'lxml')
 
-    book_details = {}
-    book_details['name'], book_details['author'] = soup.title.text.split(', ')[0].split(' - ')
+    book_title = soup.title.text.split(', ')[0].split(' - ')
+    book_details = {
+        'name': book_title[0],
+        'author': book_title[1],
+    }
 
     image_src = soup.find('div', class_='bookimage').find('img')['src']
     book_details['image_url'] = urljoin('https://tululu.org/', image_src)

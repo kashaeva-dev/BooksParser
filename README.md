@@ -39,3 +39,4 @@ The script will display the names and authors of the downloaded books in the con
 the [tululu.org]('https://tululu.org/') website and download the books.
 - The script will not download books that are absent on the website so in the books folder you may
 find fewer books than the specified range.
+- You can find book IDs that are absent on the website in the ```book_parser.log``` file.

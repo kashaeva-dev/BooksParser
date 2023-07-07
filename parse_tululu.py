@@ -65,16 +65,16 @@ def get_book_page(book_id):
 
     check_for_redirect(response)
 
-    return response.text
+    return response
 
 
-def parse_book_page(response_text):
-    soup = BeautifulSoup(response_text, 'lxml')
+def parse_book_page(response):
+    soup = BeautifulSoup(response.text, 'lxml')
 
     book_name, book_author = soup.title.text.split(', ')[0].split(' - ')
 
     image_src = soup.find('div', class_='bookimage').find('img')['src']
-    book_image_url = urljoin('https://tululu.org/', image_src)
+    book_image_url = urljoin(response.url, image_src)
 
     book_genre = soup.find('span', class_='d_book').find('a').text
 
@@ -127,8 +127,8 @@ def main():
     end_id = user_input.end_id
     for book_id in range(start_id, end_id + 1):
         try:
-            response_text = get_book_page(book_id)
-            book_details = parse_book_page(response_text)
+            book_page = get_book_page(book_id)
+            book_details = parse_book_page(book_page)
             is_downloaded = download_txt(book_id, book_details['name'], 'books')
             download_image(book_details['image_url'], 'images')
         except requests.HTTPError:

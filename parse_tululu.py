@@ -71,19 +71,23 @@ def get_book_page(book_id):
 def parse_book_page(response_text):
     soup = BeautifulSoup(response_text, 'lxml')
 
-    book_title = soup.title.text.split(', ')[0].split(' - ')
-    book_details = {
-        'name': book_title[0],
-        'author': book_title[1],
-    }
+    book_name, book_author = soup.title.text.split(', ')[0].split(' - ')
 
     image_src = soup.find('div', class_='bookimage').find('img')['src']
-    book_details['image_url'] = urljoin('https://tululu.org/', image_src)
+    book_image_url = urljoin('https://tululu.org/', image_src)
 
-    book_details['genre'] = soup.find('span', class_='d_book').find('a').text
+    book_genre = soup.find('span', class_='d_book').find('a').text
 
     comments = soup.find_all('div', class_='texts')
-    book_details['comments'] = [comment.find('span').text for comment in comments]
+    book_comments = [comment.find('span').text for comment in comments]
+
+    book_details = {
+        'name': book_name,
+        'author': book_author,
+        'image_url': book_image_url,
+        'genre': book_genre,
+        'comments': book_comments,
+    }
 
     return book_details
 

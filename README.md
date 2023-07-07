@@ -1,6 +1,6 @@
 # Book Parser
 This is a Python script that allows you to parse and download books from 
-the tululu.org website. It retrieves book details, downloads the book in text format,
+the [tululu.org]('https://tululu.org/') website. It retrieves book details, downloads the book in text format,
 and saves the book cover image.
 
 ## Installation

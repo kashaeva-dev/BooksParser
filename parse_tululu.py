@@ -2,6 +2,7 @@ import argparse
 import os
 import logging.config
 from urllib.parse import urljoin, urlsplit
+from time import sleep
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,7 +22,7 @@ def download_txt(book_id, filename, folder):
     url = "https://tululu.org/txt.php"
     payload = {'id': book_id}
 
-    response = requests.get(url, params=payload)
+    response = requests.get(url, params=payload, timeout=10)
     response.raise_for_status()
 
     check_for_redirect(response)
@@ -40,7 +41,7 @@ def download_txt(book_id, filename, folder):
 
 
 def download_image(url, folder):
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
 
     check_for_redirect(response)
@@ -57,7 +58,7 @@ def download_image(url, folder):
 
 def get_book_page(book_id):
     url = f'https://tululu.org/b{book_id}/'
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
 
     check_for_redirect(response)
@@ -68,7 +69,9 @@ def get_book_page(book_id):
 def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
 
-    book_name, book_author = soup.title.text.split(', ')[0].split(' - ')
+    book_title = soup.title.text.split(', ')[0].split(' - ')
+    book_name = " - ".join(book_title[:-1])
+    book_author = book_title[-1]
 
     image_src = soup.find('div', class_='bookimage').find('img')['src']
     book_image_url = urljoin(response.url, image_src)
@@ -117,19 +120,44 @@ def main():
     start_id = user_input.start_id
     end_id = user_input.end_id
 
-    for book_id in range(start_id, end_id + 1):
-        try:
-            book_page = get_book_page(book_id)
-            book_details = parse_book_page(book_page)
-            is_downloaded = download_txt(book_id, book_details['name'], 'books')
-            download_image(book_details['image_url'], 'images')
-        except requests.HTTPError:
-            logger.error(f'Book with id {book_id} is not found')
+    resume_state = start_id
+    book_processed = False
+
+    while resume_state < end_id + 1:
+        logger.debug('Начинается while')
+        if os.path.exists('resume_state.txt'):
+            with open('resume_state.txt', 'r') as file:
+                resume_state = int(file.read())
+            os.remove('resume_state.txt')
+        for book_id in range(resume_state, end_id + 1):
+            logger.debug(f'скачиваем книгу: {book_id}')
+            try:
+                book_page = get_book_page(book_id)
+                book_details = parse_book_page(book_page)
+                is_downloaded = download_txt(book_id, book_details['name'], 'books')
+                download_image(book_details['image_url'], 'images')
+                book_processed = True
+            except requests.exceptions.HTTPError:
+                logger.error(f'Book with id {book_id} is not found')
+                book_processed = True
+                continue
+            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                if not os.path.exists('resume_state.txt'):
+                    with open('resume_state.txt', 'w') as file:
+                        file.write(f'{book_id}')
+                logger.error('Connection error')
+                sleep(5)
+                book_processed = False
+                break
+
+            if is_downloaded:
+                print('Название:', book_details['name'])
+                print('Автор:', book_details['author'])
+                print('')
+        if book_processed:
+            break
+        else:
             continue
-        if is_downloaded:
-            print('Название:', book_details['name'])
-            print('Автор:', book_details['author'])
-            print('')
 
 
 if __name__ == "__main__":

@@ -37,8 +37,6 @@ def download_txt(book_id, filename, folder, timeout=10):
     with open(book_path, 'w') as file:
         file.write(book)
 
-    return True
-
 
 def download_image(url, folder, timeout=10):
     response = requests.get(url, timeout=timeout)
@@ -54,16 +52,6 @@ def download_image(url, folder, timeout=10):
 
     with open(image_path, 'wb') as file:
         file.write(response.content)
-
-
-def get_book_page(book_id, timeout=10):
-    url = f'https://tululu.org/b{book_id}/'
-    response = requests.get(url, timeout=timeout)
-    response.raise_for_status()
-
-    check_for_redirect(response)
-
-    return response
 
 
 def parse_book_page(response):
@@ -126,11 +114,17 @@ def main():
     while current_book < end_id + 1:
         logger.debug(f'Start while, trу to download book with ID {current_book}')
         try:
-            book_page = get_book_page(current_book, timeout)
+            url = f'https://tululu.org/b{current_book}/'
+            book_page = requests.get(url, timeout=timeout)
+            book_page.raise_for_status()
+
+            check_for_redirect(book_page)
+
             book_details = parse_book_page(book_page)
-            is_downloaded = download_txt(current_book, book_details['name'], 'books', timeout)
+            download_txt(current_book, book_details['name'], 'books', timeout)
             download_image(book_details['image_url'], 'images', timeout)
-            logger.debug(f'Book was downloaded')
+
+            logger.debug('Book was downloaded')
         except requests.exceptions.HTTPError:
             logger.error(f'Book with ID {current_book} is not found')
             current_book += 1

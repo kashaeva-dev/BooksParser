@@ -120,37 +120,28 @@ def main():
     start_id = user_input.start_id
     end_id = user_input.end_id
 
-    resume_state = start_id
+    current_book = start_id
     timeout = 10
-    book_processed = False
 
-    while resume_state < end_id + 1:
-        logger.debug('Начинается while')
-        for book_id in range(resume_state, end_id + 1):
-            logger.debug(f'скачиваем книгу: {book_id}')
-            try:
-                book_page = get_book_page(book_id, timeout)
-                book_details = parse_book_page(book_page)
-                is_downloaded = download_txt(book_id, book_details['name'], 'books', timeout)
-                download_image(book_details['image_url'], 'images', timeout)
-                book_processed = True
-            except requests.exceptions.HTTPError:
-                logger.error(f'Book with id {book_id} is not found')
-                book_processed = True
-                continue
-            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
-                book_processed = False
-                logger.error('Connection error')
-                resume_state = book_id
-                sleep(5)
-                break
-
-            if is_downloaded:
-                print('Название:', book_details['name'])
-                print('Автор:', book_details['author'])
-                print('')
-        if book_processed:
-            break
+    while current_book < end_id + 1:
+        logger.debug(f'Start while, trу to download book with ID {current_book}')
+        try:
+            book_page = get_book_page(current_book, timeout)
+            book_details = parse_book_page(book_page)
+            is_downloaded = download_txt(current_book, book_details['name'], 'books', timeout)
+            download_image(book_details['image_url'], 'images', timeout)
+            logger.debug(f'Book was downloaded')
+        except requests.exceptions.HTTPError:
+            logger.error(f'Book with ID {current_book} is not found')
+            current_book += 1
+        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+            logger.error('Connection error')
+            sleep(5)
+        else:
+            current_book += 1
+            print('Название:', book_details['name'])
+            print('Автор:', book_details['author'])
+            print('')
 
 
 if __name__ == "__main__":

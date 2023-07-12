@@ -1,6 +1,7 @@
 import argparse
 import logging.config
 import os
+import json
 from time import sleep
 from urllib.parse import urljoin, urlsplit
 
@@ -107,6 +108,8 @@ def get_books_by_ids(ids):
     current_book_index = 0
     timeout = 10
 
+    books_details = []
+
     while current_book_index < len(ids):
         current_book = ids[current_book_index]
         logger.debug(f'Start while, trу to download book with ID {current_book} (index {current_book_index})')
@@ -120,7 +123,7 @@ def get_books_by_ids(ids):
             book_details = parse_book_page(book_page)
             download_txt(current_book, book_details['name'], 'books', timeout)
             download_image(book_details['image_url'], 'images', timeout)
-
+            books_details.append(book_details)
             logger.debug('Book was downloaded')
         except requests.exceptions.HTTPError:
             logger.error(f'Book with ID {current_book} is not found')
@@ -133,3 +136,7 @@ def get_books_by_ids(ids):
             print('Название:', book_details['name'])
             print('Автор:', book_details['author'])
             print('')
+
+    books_details_json = json.dumps(books_details, indent=4, ensure_ascii=False)
+    with open('books_details.json', 'w', encoding='utf-8') as file:
+        file.write(books_details_json)

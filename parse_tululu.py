@@ -1,8 +1,8 @@
 import argparse
-import os
 import logging.config
-from urllib.parse import urljoin, urlsplit
+import os
 from time import sleep
+from urllib.parse import urljoin, urlsplit
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,7 +10,7 @@ from pathvalidate import sanitize_filename
 
 from config import logger_config
 
-logger = logging.getLogger("book_parser_logger")
+logger = logging.getLogger("parse_tululu_logger")
 
 
 def check_for_redirect(response):
@@ -64,16 +64,17 @@ def parse_book_page(response):
     image_src = soup.find('div', class_='bookimage').find('img')['src']
     book_image_url = urljoin(response.url, image_src)
 
-    book_genre = soup.find('span', class_='d_book').find('a').text
+    genre_tags = soup.find_all('span', class_='d_book')
+    book_genres = [genre.find('a').text for genre in genre_tags]
 
-    comments = soup.find_all('div', class_='texts')
-    book_comments = [comment.find('span').text for comment in comments]
+    comment_tags = soup.find_all('div', class_='texts')
+    book_comments = [comment.find('span').text for comment in comment_tags]
 
     book_details = {
         'name': book_name,
         'author': book_author,
         'image_url': book_image_url,
-        'genre': book_genre,
+        'genres': book_genres,
         'comments': book_comments,
     }
 
@@ -99,20 +100,16 @@ def create_parser():
     return parser
 
 
-def main():
+def get_books_by_ids(ids):
     logging.config.dictConfig(logger_config)
     logger.debug('Start parsing books')
 
-    parser = create_parser()
-    user_input = parser.parse_args()
-    start_id = user_input.start_id
-    end_id = user_input.end_id
-
-    current_book = start_id
+    current_book_index = 0
     timeout = 10
 
-    while current_book < end_id + 1:
-        logger.debug(f'Start while, trу to download book with ID {current_book}')
+    while current_book_index < len(ids):
+        current_book = ids[current_book_index]
+        logger.debug(f'Start while, trу to download book with ID {current_book} (index {current_book_index})')
         try:
             url = f'https://tululu.org/b{current_book}/'
             book_page = requests.get(url, timeout=timeout)
@@ -127,16 +124,12 @@ def main():
             logger.debug('Book was downloaded')
         except requests.exceptions.HTTPError:
             logger.error(f'Book with ID {current_book} is not found')
-            current_book += 1
+            current_book_index += 1
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
             logger.error('Connection error')
             sleep(5)
         else:
-            current_book += 1
+            current_book_index += 1
             print('Название:', book_details['name'])
             print('Автор:', book_details['author'])
             print('')
-
-
-if __name__ == "__main__":
-    main()

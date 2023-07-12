@@ -16,9 +16,13 @@ logger_config = {
             },
         },
     'loggers': {
-        'book_parser_logger': {
+        'parse_tululu_category_logger': {
             'handlers': ['file'],
             'level': 'DEBUG',
         },
+        'parse_tululu_logger': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        }
     },
 }

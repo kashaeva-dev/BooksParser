@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ## Usage
 To parse and download books from the first 5 pages run the script with the following command:
 ```
-python parse_tululu.py --start_page 1 --end_page 5
+python parse_tululu_category.py --start_page 1 --end_page 5
 ```
 The scrips will parse books from the first 5 pages. 
 The script will display the names and authors of the downloaded books in the console.
@@ -39,13 +39,13 @@ which is destination folder by default.
 
 You can specify the destination folder for the books and images with the --dest_folder argument:
 ```
-python parse_tululu.py --start_page 1 --end_page 5 --dest_folder my_folder
+python parse_tululu_category.py --start_page 1 --end_page 5 --dest_folder my_folder
 ```
 Now all the data will be saved in the `my_folder` folder.
 
 You can also skip downloading of books' images or texts with --skip_imgs or --skip_txt flags:
 ```
-python parse_tululu.py --start_page 1 --end_page 5 --skip_imgs --skip_txt
+python parse_tululu_category.py --start_page 1 --end_page 5 --skip_imgs --skip_txt
 ```
 The script will parse books from the first 5 pages and **will only save their description** to `book_details.json`
 file in the `tululu_books` folder.

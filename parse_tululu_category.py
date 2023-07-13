@@ -31,6 +31,8 @@ def create_parser():
         description="A science fiction book parser for tululu.org website. "
                     "You can download science fiction books by specifying the range of science fiction books pages. "
                     "Books will be saved in the 'books' folder, books' covers in the 'images' folder."
+                    "You can specify the destination folder for these folders with the --dest_folder argument."
+                    "You can also skip downloading of books' images or texts with --skip_imgs or --skip_txt flags."
                     "In the console, you will see the names and authors of the downloaded books.",
     )
     parser.add_argument('--start_page',
@@ -40,6 +42,18 @@ def create_parser():
     parser.add_argument('--end_page',
                         help='You should specify the end page of the books range',
                         type=int,
+                        )
+    parser.add_argument('--dest_folder',
+                        help='You can specify folder the books will be downloaded to',
+                        default='tululu_books'
+                        )
+    parser.add_argument('--skip_imgs',
+                        action='store_true',
+                        help="If specified the images won't be downloaded",
+                        )
+    parser.add_argument('--skip_txt',
+                        action='store_true',
+                        help="If specified the texts of the books won't be downloaded",
                         )
     return parser
 
@@ -66,7 +80,7 @@ def main():
         exit()
 
     ids = get_books_ids(args.start_page, args.end_page +1)
-    get_books_by_ids(ids)
+    get_books_by_ids(ids, args.dest_folder, args.skip_imgs, args.skip_txt)
 
 
 if __name__ == "__main__":

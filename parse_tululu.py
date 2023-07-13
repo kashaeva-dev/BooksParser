@@ -80,7 +80,7 @@ def parse_book_page(response):
     return book_details
 
 
-def get_books_by_ids(ids):
+def get_books_by_ids(ids, dest_folder, skip_imgs=False, skip_txt=False):
     logging.config.dictConfig(logger_config)
     logger.debug('Start parsing books')
 
@@ -100,8 +100,12 @@ def get_books_by_ids(ids):
             check_for_redirect(book_page)
 
             book_details = parse_book_page(book_page)
-            download_txt(current_book, book_details['name'], 'books', timeout)
-            download_image(book_details['image_url'], 'images', timeout)
+            if not skip_txt:
+                books_path = os.path.join(dest_folder, 'books')
+                download_txt(current_book, book_details['name'], books_path, timeout)
+            if not skip_imgs:
+                images_path = os.path.join(dest_folder, 'images')
+                download_image(book_details['image_url'], images_path, timeout)
             books_details.append(book_details)
             logger.debug('Book was downloaded')
         except requests.exceptions.HTTPError:
@@ -117,7 +121,9 @@ def get_books_by_ids(ids):
             print('')
 
     books_details_json = json.dumps(books_details, indent=4, ensure_ascii=False)
-    with open('books_details.json', 'w', encoding='utf-8') as file:
+    os.makedirs(dest_folder, exist_ok=True)
+    json_path = os.path.join(dest_folder, 'books_details.json')
+    with open(json_path, 'w', encoding='utf-8') as file:
         file.write(books_details_json)
 
 

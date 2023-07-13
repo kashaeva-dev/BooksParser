@@ -28,10 +28,11 @@ def get_books_ids(start_page=1, end_page=10):
 def create_parser():
     parser = argparse.ArgumentParser(
         prog='Parse books from tululu',
-        description="A science fiction book parser for tululu.org website. "
-                    "You can download science fiction books by specifying the range of science fiction books pages. "
+        description="A science fiction books parser for tululu.org website. "
+                    "You can download science fiction books by specifying the range of pages with science fiction books. "
                     "Books will be saved in the 'books' folder, books' covers in the 'images' folder."
                     "You can specify the destination folder for these folders with the --dest_folder argument."
+                    "A json file with books' info will be saved in the destination folder too."
                     "You can also skip downloading of books' images or texts with --skip_imgs or --skip_txt flags."
                     "In the console, you will see the names and authors of the downloaded books.",
     )

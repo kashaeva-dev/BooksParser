@@ -5,12 +5,12 @@ and saves the book cover image.
 
 You can download science fiction books by specifying the range of pages with science fiction books.
 There are 701 pages and about 25 books per page.
-Books will be saved in the 'books' folder, books' covers in the 'images' folder.
+Books will be saved in the `books` folder, books' covers in the `images` folder.
 You can specify the destination folder for these folders with the `--dest_folder` argument.
 A json file with books' info will be saved in the destination folder too.
-`tululu_books` is the destination folder by default.
+By default `tululu_books` is the destination folder.
 You can also skip downloading of books' images or texts with `--skip_imgs` or `--skip_txt` flags.
-In the console, you will see the names and authors of the downloaded books.",
+In the console, you will see the names and authors of the downloaded books.
 
 ## Installation
 Clone the repository:

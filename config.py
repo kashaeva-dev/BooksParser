@@ -28,6 +28,6 @@ logger_config = {
         'parse_tululu_logger': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
-        }
+        },
     },
 }

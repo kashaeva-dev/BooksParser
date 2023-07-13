@@ -10,6 +10,7 @@ from parse_tululu import get_books_by_ids
 
 logger = logging.getLogger("parse_tululu_category_logger")
 
+
 def get_books_ids(start_page=1, end_page=10):
     base_url = 'https://tululu.org/l55/'
     book_ids = []
@@ -29,7 +30,7 @@ def create_parser():
     parser = argparse.ArgumentParser(
         prog='Parse books from tululu',
         description="A science fiction books parser for tululu.org website. "
-                    "You can download science fiction books by specifying the range of pages with science fiction books. "
+                    "You can download science fiction books by specifying range of pages with science fiction books. "
                     "Books will be saved in the 'books' folder, books' covers in the 'images' folder."
                     "You can specify the destination folder for these folders with the --dest_folder argument."
                     "A json file with books' info will be saved in the destination folder too."
@@ -46,7 +47,7 @@ def create_parser():
                         )
     parser.add_argument('--dest_folder',
                         help='You can specify folder the books will be downloaded to',
-                        default='tululu_books'
+                        default='tululu_books',
                         )
     parser.add_argument('--skip_imgs',
                         action='store_true',
@@ -80,7 +81,7 @@ def main():
         logger.error('End page should be equal to or less than 701')
         exit()
 
-    ids = get_books_ids(args.start_page, args.end_page +1)
+    ids = get_books_ids(args.start_page, args.end_page + 1)
     get_books_by_ids(ids, args.dest_folder, args.skip_imgs, args.skip_txt)
 
 

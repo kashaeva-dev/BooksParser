@@ -1,7 +1,6 @@
-import argparse
+import json
 import logging.config
 import os
-import json
 from time import sleep
 from urllib.parse import urljoin, urlsplit
 

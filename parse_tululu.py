@@ -58,18 +58,16 @@ def download_image(url, folder, timeout=10):
 def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
 
-    book_title = soup.title.text.split(', ')[0].split(' - ')
-    book_name = " - ".join(book_title[:-1])
-    book_author = book_title[-1]
+    book_title = soup.title.text.split(' - ')
+    book_name = book_title[0]
+    book_author = book_title[1].split(', ')[0]
 
-    image_src = soup.find('div', class_='bookimage').find('img')['src']
+    image_src = soup.select_one('.bookimage img')['src']
     book_image_url = urljoin(response.url, image_src)
 
-    genre_tags = soup.find_all('span', class_='d_book')
-    book_genres = [genre.find('a').text for genre in genre_tags]
+    book_genres = [genre.text for genre in soup.select('span.d_book a')]
 
-    comment_tags = soup.find_all('div', class_='texts')
-    book_comments = [comment.find('span').text for comment in comment_tags]
+    book_comments = [comment.text for comment in soup.select('.texts span')]
 
     book_details = {
         'name': book_name,
@@ -140,3 +138,7 @@ def get_books_by_ids(ids):
     books_details_json = json.dumps(books_details, indent=4, ensure_ascii=False)
     with open('books_details.json', 'w', encoding='utf-8') as file:
         file.write(books_details_json)
+
+
+if __name__ == '__main__':
+    get_books_by_ids([1, 2])

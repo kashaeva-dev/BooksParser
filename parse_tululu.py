@@ -80,25 +80,6 @@ def parse_book_page(response):
     return book_details
 
 
-def create_parser():
-    parser = argparse.ArgumentParser(
-        prog='Parse books from tululu',
-        description="A book parser for tululu.org website. "
-                    "You can download books by specifying the range of book ids. "
-                    "Books will be saved in the 'books' folder, books' covers in the 'images' folder."
-                    "In the console, you will see the names and authors of the downloaded books.",
-    )
-    parser.add_argument('start_id',
-                        help='You should specify the start id of the books range',
-                        type=int,
-                        default=1)
-    parser.add_argument('end_id',
-                        help='You should specify the end id of the books range',
-                        type=int,
-                        default=10)
-    return parser
-
-
 def get_books_by_ids(ids):
     logging.config.dictConfig(logger_config)
     logger.debug('Start parsing books')

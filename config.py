@@ -14,14 +14,19 @@ logger_config = {
             'formatter': 'std_format',
             'level': 'DEBUG',
             },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'std_format',
+            'level': 'ERROR',
+        },
         },
     'loggers': {
         'parse_tululu_category_logger': {
-            'handlers': ['file'],
+            'handlers': ['file', 'console'],
             'level': 'DEBUG',
         },
         'parse_tululu_logger': {
-            'handlers': ['file'],
+            'handlers': ['file', 'console'],
             'level': 'DEBUG',
         }
     },

@@ -119,11 +119,11 @@ def get_books_by_ids(ids, dest_folder, skip_imgs=False, skip_txt=False):
             print('Автор:', book_details['author'])
             print('')
 
-    books_details_json = json.dumps(books_details, indent=4, ensure_ascii=False)
     os.makedirs(dest_folder, exist_ok=True)
-    json_path = os.path.join(dest_folder, 'books_details.json')
-    with open(json_path, 'w', encoding='utf-8') as file:
-        file.write(books_details_json)
+    json_file_path = os.path.join(dest_folder, 'books_details.json')
+
+    with open(json_file_path, 'w', encoding='utf-8') as file:
+        json.dump(books_details, file, indent=4, ensure_ascii=False)
 
 
 if __name__ == '__main__':

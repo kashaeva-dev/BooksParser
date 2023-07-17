@@ -84,7 +84,7 @@ def main():
         logger.error('Start page should be greater than 0')
         exit()
 
-    if args.end_page is None:
+    if not args.end_page:
         args.end_page = args.start_page
 
     if args.end_page < args.start_page:
@@ -94,7 +94,6 @@ def main():
     if args.end_page > 701:
         logger.error('End page should be equal to or less than 701')
         exit()
-
 
     ids = get_books_ids(args.start_page, args.end_page + 1)
     get_books_by_ids(ids, args.dest_folder, args.skip_imgs, args.skip_txt)

@@ -83,16 +83,16 @@ def get_books_by_ids(ids, dest_folder, skip_imgs=False, skip_txt=False):
     logging.config.dictConfig(logger_config)
     logger.debug('Start parsing books')
 
-    current_book_index = 0
+    current_book_id_index = 0
     timeout = 10
 
     books_details = []
 
-    while current_book_index < len(ids):
-        current_book = ids[current_book_index]
-        logger.debug(f'Start while, trу to download book with ID {current_book} (index {current_book_index})')
+    while current_book_id_index < len(ids):
+        current_book_id = ids[current_book_id_index]
+        logger.debug(f'Start while, trу to download book with ID {current_book_id} (index {current_book_id_index})')
         try:
-            url = f'https://tululu.org/b{current_book}/'
+            url = f'https://tululu.org/b{current_book_id}/'
             book_page = requests.get(url, timeout=timeout)
             book_page.raise_for_status()
 
@@ -101,20 +101,20 @@ def get_books_by_ids(ids, dest_folder, skip_imgs=False, skip_txt=False):
             book_details = parse_book_page(book_page)
             if not skip_txt:
                 books_path = os.path.join(dest_folder, 'books')
-                download_txt(current_book, book_details['name'], books_path, timeout)
+                download_txt(current_book_id, book_details['name'], books_path, timeout)
             if not skip_imgs:
                 images_path = os.path.join(dest_folder, 'images')
                 download_image(book_details['image_url'], images_path, timeout)
             books_details.append(book_details)
             logger.debug('Book was downloaded')
         except requests.exceptions.HTTPError:
-            logger.error(f'Book with ID {current_book} is not found')
-            current_book_index += 1
+            logger.error(f'Book with ID {current_book_id} is not found')
+            current_book_id_index += 1
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
             logger.error('Connection error')
             sleep(5)
         else:
-            current_book_index += 1
+            current_book_id_index += 1
             print('Название:', book_details['name'])
             print('Автор:', book_details['author'])
             print('')

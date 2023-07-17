@@ -1,7 +1,7 @@
 import argparse
 import logging.config
-from urllib.parse import urljoin
 from time import sleep
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup

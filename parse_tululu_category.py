@@ -1,6 +1,7 @@
 import argparse
 import logging.config
 from urllib.parse import urljoin
+from time import sleep
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,17 +12,27 @@ from parse_tululu import get_books_by_ids
 logger = logging.getLogger("parse_tululu_category_logger")
 
 
-def get_books_ids(start_page=1, end_page=10):
+def get_books_ids(start_page=1, end_page=10, timeout=10):
     base_url = 'https://tululu.org/l55/'
     book_ids = []
-    for page in range(start_page, end_page):
-        url = urljoin(base_url, str(page))
-        response = requests.get(url)
-        response.raise_for_status()
+    current_page = start_page
+    while current_page < end_page + 1:
+        try:
+            logger.debug(f'Parsing page {current_page}')
 
-        soup = BeautifulSoup(response.text, 'lxml')
-
-        book_ids.extend([tag['href'].strip('/b') for tag in soup.select('.d_book .bookimage a')])
+            url = urljoin(base_url, str(current_page))
+            response = requests.get(url, timeout=timeout)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            logger.error(f'Page {current_page} was not found')
+            current_page += 1
+        except requests.exceptions.ConnectionError:
+            logger.error(f'Connection error with page {current_page}')
+            sleep(5)
+        else:
+            current_page += 1
+            soup = BeautifulSoup(response.text, 'lxml')
+            book_ids.extend([tag['href'].strip('/b') for tag in soup.select('.d_book .bookimage a')])
 
     return book_ids
 
@@ -80,6 +91,7 @@ def main():
     if args.end_page > 701:
         logger.error('End page should be equal to or less than 701')
         exit()
+
 
     ids = get_books_ids(args.start_page, args.end_page + 1)
     get_books_by_ids(ids, args.dest_folder, args.skip_imgs, args.skip_txt)

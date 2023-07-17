@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import logger_config
-from parse_tululu import get_books_by_ids
+from parse_tululu import get_books_by_ids, check_for_redirect
 
 logger = logging.getLogger("parse_tululu_category_logger")
 
@@ -23,6 +23,9 @@ def get_books_ids(start_page=1, end_page=10, timeout=10):
             url = urljoin(base_url, str(current_page))
             response = requests.get(url, timeout=timeout)
             response.raise_for_status()
+
+            check_for_redirect(response)
+
         except requests.exceptions.HTTPError:
             logger.error(f'Page {current_page} was not found')
             current_page += 1

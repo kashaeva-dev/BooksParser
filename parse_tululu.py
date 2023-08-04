@@ -1,6 +1,7 @@
 import json
 import logging.config
 import os
+from pprint import pprint
 from time import sleep
 from urllib.parse import urljoin, urlsplit
 
@@ -56,10 +57,10 @@ def download_image(url, folder, timeout=10):
 
 def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
+    title_tag = soup.select_one('h1')
 
-    book_title = soup.title.text.split(' - ')
-    book_name = book_title[0]
-    book_author = book_title[1].split(', ')[0]
+    book_name = title_tag.text.split('::')[0].strip()
+    book_author = title_tag.text.split('::')[1].strip()
 
     image_src = soup.select_one('.bookimage img')['src']
     book_image_url = urljoin(response.url, image_src)
@@ -72,6 +73,7 @@ def parse_book_page(response):
         'name': book_name,
         'author': book_author,
         'image_url': book_image_url,
+        'image_src': os.path.join('images', image_src.split('/')[-1]),
         'genres': book_genres,
         'comments': book_comments,
     }
